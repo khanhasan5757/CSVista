@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced CSV Data Visualizer &amp; Analysis Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">📊 CSV Analyzer</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-section="upload">
+                    <span class="nav-icon">📁</span>
+                    <span class="nav-label">Upload</span>
+                </button>
+                <button class="nav-item" data-section="statistics" disabled>
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">Statistics</span>
+                </button>
+                <button class="nav-item" data-section="data-table" disabled>
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Data Table</span>
+                </button>
+                <button class="nav-item" data-section="visualizations" disabled>
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Visualizations</span>
+                </button>
+                <button class="nav-item" data-section="insights" disabled>
+                    <span class="nav-icon">💡</span>
+                    <span class="nav-label">Smart Insights</span>
+                </button>
+                <button class="nav-item" data-section="transform" disabled>
+                    <span class="nav-icon">🔧</span>
+                    <span class="nav-label">Transform</span>
+                </button>
+                <button class="nav-item" data-section="export" disabled>
+                    <span class="nav-icon">💾</span>
+                    <span class="nav-label">Export</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="content-section active" id="upload-section">
+                <div class="section-header">
+                    <h1>Upload Your CSV File</h1>
+                    <p class="section-description">Drag and drop your CSV file or click to browse</p>
+                </div>
+                
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drop your CSV file here</h3>
+                    <p>or</p>
+                    <button class="btn btn--primary" id="browse-btn">Browse Files</button>
+                    <input type="file" id="file-input" accept=".csv" hidden>
+                    <p class="upload-hint">Supports CSV files up to 10MB</p>
+                </div>
+
+                <div class="file-preview" id="file-preview" style="display: none;">
+                    <div class="preview-header">
+                        <h3>File Preview</h3>
+                        <button class="btn btn--secondary btn--sm" id="change-file-btn">Change File</button>
+                    </div>
+                    <div class="preview-details">
+                        <div class="preview-item">
+                            <span class="preview-label">Filename:</span>
+                            <span class="preview-value" id="preview-filename"></span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Size:</span>
+                            <span class="preview-value" id="preview-size"></span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Rows:</span>
+                            <span class="preview-value" id="preview-rows"></span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Columns:</span>
+                            <span class="preview-value" id="preview-columns"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section class="content-section" id="statistics-section">
+                <div class="section-header">
+                    <h1>Data Statistics</h1>
+                    <p class="section-description">Overview of your dataset metrics</p>
+                </div>
+
+                <div class="stats-grid" id="stats-grid">
+                    <!-- Stats cards will be dynamically generated -->
+                </div>
+
+                <div class="column-stats-panel">
+                    <h3>Column Statistics</h3>
+                    <div class="form-group">
+                        <label class="form-label">Select Column:</label>
+                        <select class="form-control" id="stats-column-select">
+                            <option value="">Choose a column...</option>
+                        </select>
+                    </div>
+                    <div id="column-stats-details" class="column-stats-details"></div>
+                </div>
+            </section>
+
+            <!-- Data Table Section -->
+            <section class="content-section" id="data-table-section">
+                <div class="section-header">
+                    <h1>Data Table</h1>
+                    <p class="section-description">View, search, filter, and annotate your data</p>
+                </div>
+
+                <div class="table-controls">
+                    <div class="control-group">
+                        <input type="text" class="form-control search-input" id="table-search" placeholder="🔍 Search across all columns...">
+                    </div>
+                    <div class="control-group">
+                        <button class="btn btn--secondary btn--sm" id="add-filter-btn">+ Add Filter</button>
+                        <button class="btn btn--secondary btn--sm" id="clear-filters-btn">Clear All Filters</button>
+                        <select class="form-control" id="rows-per-page">
+                            <option value="10">10 rows</option>
+                            <option value="25" selected>25 rows</option>
+                            <option value="50">50 rows</option>
+                            <option value="100">100 rows</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-chips" id="filter-chips"></div>
+
+                <div class="table-wrapper">
+                    <table class="data-table" id="data-table">
+                        <thead id="table-header"></thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-controls" id="pagination-controls">
+                    <button class="btn btn--secondary btn--sm" id="prev-page">← Previous</button>
+                    <span id="page-info"></span>
+                    <button class="btn btn--secondary btn--sm" id="next-page">Next →</button>
+                </div>
+            </section>
+
+            <!-- Visualizations Section -->
+            <section class="content-section" id="visualizations-section">
+                <div class="section-header">
+                    <h1>Data Visualizations</h1>
+                    <p class="section-description">Interactive charts and graphs</p>
+                </div>
+
+                <div class="chart-controls">
+                    <div class="form-group">
+                        <label class="form-label">Chart Type:</label>
+                        <select class="form-control" id="chart-type">
+                            <option value="bar">📊 Bar Chart</option>
+                            <option value="line">📈 Line Chart</option>
+                            <option value="scatter">🔵 Scatter Plot</option>
+                            <option value="pie">🍰 Pie Chart</option>
+                            <option value="area">⛰️ Area Chart</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">X-Axis:</label>
+                        <select class="form-control" id="x-axis-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Y-Axis:</label>
+                        <select class="form-control" id="y-axis-select"></select>
+                    </div>
+                    <button class="btn btn--primary" id="generate-chart-btn">Generate Chart</button>
+                    <button class="btn btn--secondary" id="download-chart-btn">Download PNG</button>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="main-chart"></canvas>
+                </div>
+
+                <div class="correlation-panel" style="margin-top: 32px;">
+                    <h3>Correlation Analysis</h3>
+                    <button class="btn btn--secondary" id="show-correlation-btn">Generate Correlation Matrix</button>
+                    <div id="correlation-matrix" class="correlation-matrix"></div>
+                </div>
+            </section>
+
+            <!-- Smart Insights Section -->
+            <section class="content-section" id="insights-section">
+                <div class="section-header">
+                    <h1>Smart Insights</h1>
+                    <p class="section-description">Automatically detected patterns and anomalies</p>
+                </div>
+
+                <div class="insights-grid" id="insights-grid">
+                    <!-- Insights cards will be dynamically generated -->
+                </div>
+            </section>
+
+            <!-- Transform Section -->
+            <section class="content-section" id="transform-section">
+                <div class="section-header">
+                    <h1>Data Transformation</h1>
+                    <p class="section-description">Modify and enhance your dataset</p>
+                </div>
+
+                <div class="transform-grid">
+                    <div class="card transform-card">
+                        <h3>🧮 Calculate Column</h3>
+                        <div class="form-group">
+                            <label class="form-label">New Column Name:</label>
+                            <input type="text" class="form-control" id="calc-column-name" placeholder="e.g., Total">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Formula:</label>
+                            <select class="form-control" id="calc-operation">
+                                <option value="sum">Sum of columns</option>
+                                <option value="difference">Difference</option>
+                                <option value="product">Product</option>
+                                <option value="percentage">Percentage</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Column A:</label>
+                            <select class="form-control" id="calc-col-a"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Column B:</label>
+                            <select class="form-control" id="calc-col-b"></select>
+                        </div>
+                        <button class="btn btn--primary btn--full-width" id="apply-calc-btn">Apply Calculation</button>
+                    </div>
+
+                    <div class="card transform-card">
+                        <h3>📊 Group &amp; Aggregate</h3>
+                        <div class="form-group">
+                            <label class="form-label">Group By Column:</label>
+                            <select class="form-control" id="group-by-column"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Aggregate Column:</label>
+                            <select class="form-control" id="aggregate-column"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Aggregation:</label>
+                            <select class="form-control" id="aggregate-function">
+                                <option value="sum">Sum</option>
+                                <option value="average">Average</option>
+                                <option value="count">Count</option>
+                                <option value="min">Minimum</option>
+                                <option value="max">Maximum</option>
+                            </select>
+                        </div>
+                        <button class="btn btn--primary btn--full-width" id="apply-group-btn">Apply Grouping</button>
+                    </div>
+
+                    <div class="card transform-card">
+                        <h3>🔄 Data Cleaning</h3>
+                        <button class="btn btn--secondary btn--full-width" id="remove-duplicates-btn">Remove Duplicates</button>
+                        <div class="form-group" style="margin-top: 12px;">
+                            <label class="form-label">Fill Missing Values:</label>
+                            <select class="form-control" id="fill-method">
+                                <option value="mean">With Mean</option>
+                                <option value="median">With Median</option>
+                                <option value="zero">With Zero</option>
+                                <option value="remove">Remove Rows</option>
+                            </select>
+                        </div>
+                        <button class="btn btn--primary btn--full-width" id="fill-missing-btn">Fill Missing</button>
+                    </div>
+
+                    <div class="card transform-card">
+                        <h3>✏️ Find &amp; Replace</h3>
+                        <div class="form-group">
+                            <label class="form-label">Column:</label>
+                            <select class="form-control" id="replace-column"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Find:</label>
+                            <input type="text" class="form-control" id="find-value" placeholder="Value to find">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Replace with:</label>
+                            <input type="text" class="form-control" id="replace-value" placeholder="New value">
+                        </div>
+                        <button class="btn btn--primary btn--full-width" id="apply-replace-btn">Find &amp; Replace</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Export Section -->
+            <section class="content-section" id="export-section">
+                <div class="section-header">
+                    <h1>Export Data</h1>
+                    <p class="section-description">Download your data and visualizations</p>
+                </div>
+
+                <div class="export-grid">
+                    <div class="card export-card">
+                        <div class="export-icon">📄</div>
+                        <h3>Export to CSV</h3>
+                        <p>Download current data with filters applied</p>
+                        <button class="btn btn--primary btn--full-width" id="export-csv-btn">Download CSV</button>
+                    </div>
+
+                    <div class="card export-card">
+                        <div class="export-icon">📋</div>
+                        <h3>Export to JSON</h3>
+                        <p>Download data in JSON format</p>
+                        <button class="btn btn--primary btn--full-width" id="export-json-btn">Download JSON</button>
+                    </div>
+
+                    <div class="card export-card">
+                        <div class="export-icon">📊</div>
+                        <h3>Export Charts</h3>
+                        <p>Download current chart as PNG</p>
+                        <button class="btn btn--primary btn--full-width" id="export-chart-btn">Download Chart</button>
+                    </div>
+
+                    <div class="card export-card">
+                        <div class="export-icon">📝</div>
+                        <h3>Statistical Report</h3>
+                        <p>Download comprehensive analysis report</p>
+                        <button class="btn btn--primary btn--full-width" id="export-report-btn">Download Report</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Filter Modal -->
+    <div class="modal" id="filter-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Filter</h3>
+                <button class="modal-close" id="close-filter-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Column:</label>
+                    <select class="form-control" id="filter-column"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Operator:</label>
+                    <select class="form-control" id="filter-operator">
+                        <option value="equals">Equals</option>
+                        <option value="contains">Contains</option>
+                        <option value="starts">Starts With</option>
+                        <option value="ends">Ends With</option>
+                        <option value="gt">Greater Than</option>
+                        <option value="lt">Less Than</option>
+                        <option value="gte">Greater or Equal</option>
+                        <option value="lte">Less or Equal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Value:</label>
+                    <input type="text" class="form-control" id="filter-value" placeholder="Enter filter value">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" id="cancel-filter-btn">Cancel</button>
+                <button class="btn btn--primary" id="apply-filter-btn">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
